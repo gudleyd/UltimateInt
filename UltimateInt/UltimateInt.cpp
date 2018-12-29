@@ -3,6 +3,8 @@
 
 namespace gdl {
 
+    UltimateInt UltimateInt::ONE = UltimateInt(1);
+
     UltimateInt::UltimateInt() {
         this->_num.clear();
         this->_sign = 0;
@@ -58,6 +60,30 @@ namespace gdl {
         }
         this->_num.emplace_back(_val[st] - '0');
         this->crop();
+    }
+
+    UltimateInt& UltimateInt::operator++() {
+        UltimateInt _sv = *this;
+        *this += ONE;
+        return *this;
+    }
+
+    UltimateInt& UltimateInt::operator--() {
+        UltimateInt _sv = *this;
+        *this -= ONE;
+        return *this;
+    }
+
+    const UltimateInt UltimateInt::operator++(int) {
+        UltimateInt _sv = *this;
+        *this += ONE;
+        return _sv;
+    }
+
+    const UltimateInt UltimateInt::operator--(int) {
+        UltimateInt _sv = *this;
+        *this -= ONE;
+        return _sv;
     }
 
     UltimateInt operator+(const gdl::UltimateInt& _ui1, const gdl::UltimateInt& _ui2) {

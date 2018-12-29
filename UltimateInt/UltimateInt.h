@@ -69,6 +69,8 @@ namespace gdl {
         signed char _sign;
 
         void crop();
+
+        static UltimateInt ONE;
     };
 
 }
