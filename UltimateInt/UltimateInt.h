@@ -60,16 +60,15 @@ namespace gdl {
         friend bool operator!=(const UltimateInt&, const UltimateInt&);
 
         static UltimateInt abs(const UltimateInt&);
+        
+        int8_t sign();
 
     private:
 
         std::vector<int8_t> _num;
         signed char _sign;
 
-        void trim();
-
-        static UltimateInt ZERO;
-        static UltimateInt ONE;
+        void crop();
     };
 
 }

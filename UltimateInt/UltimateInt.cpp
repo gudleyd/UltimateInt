@@ -25,7 +25,7 @@ namespace gdl {
                 val /= 10;
             }
         }
-        this->trim();
+        this->crop();
     }
 
     UltimateInt::UltimateInt(const char* _val) {
@@ -41,7 +41,7 @@ namespace gdl {
             this->_num.emplace_back(_val[i] - '0');
         }
         this->_num.emplace_back(_val[st] - '0');
-        this->trim();
+        this->crop();
     }
 
     UltimateInt::UltimateInt(const std::string& _val) {
@@ -57,7 +57,7 @@ namespace gdl {
             this->_num.emplace_back(_val[i] - '0');
         }
         this->_num.emplace_back(_val[st] - '0');
-        this->trim();
+        this->crop();
     }
 
     UltimateInt operator+(const gdl::UltimateInt& _ui1, const gdl::UltimateInt& _ui2) {
@@ -101,7 +101,7 @@ namespace gdl {
                 _r = _n - UltimateInt::abs(*this);
             }
         }
-        _r.trim();
+        _r.crop();
         *this = _r;
         return *this;
     }
@@ -141,7 +141,7 @@ namespace gdl {
         } else {
             *this = UltimateInt::abs(_n) - UltimateInt::abs(*this);
         }
-        this->trim();
+        this->crop();
         return *this;
     }
 
@@ -178,7 +178,59 @@ namespace gdl {
         for (size_t i = 0; i < _r.size(); i++) {
             this->_num[i] = (int8_t)_r[i];
         }
-        this->trim();
+        this->crop();
+        return *this;
+    }
+
+    UltimateInt operator/(const UltimateInt& _ui1, const UltimateInt& _ui2) {
+        UltimateInt _r(_ui1);
+        _r /= _ui2;
+        return _r;
+    }
+
+    UltimateInt& UltimateInt::operator/=(const UltimateInt& _n) {
+        if (_n._sign == 0) {
+            *this = UltimateInt(0);
+            return *this;
+        }
+        if (this->_num.size() < _n._num.size()) {
+            *this = UltimateInt(0);
+            return *this;
+        }
+        UltimateInt _q, _r;
+        _q._sign = this->_sign * _n._sign;
+        UltimateInt TEN(10);
+        UltimateInt _d = UltimateInt::abs(_n);
+        for (size_t i = this->_num.size(); i >= 1; i--) {
+            _r *= TEN;
+            if (_r._num.empty()) {
+                _r._num.emplace_back(0);
+                _r._sign = 1;
+            }
+            _r._num[0] = this->_num[i - 1];
+            int8_t cnt = 0;
+            while (_r >= _d) {
+                _r -= _d;
+                ++cnt;
+            }
+            while (_q._num.size() < i) {
+                _q._num.emplace_back(0);
+            }
+            _q._num[i - 1] = cnt;
+        }
+        *this = _q;
+        this->crop();
+        return *this;
+    }
+
+    UltimateInt operator%(const UltimateInt& _ui1, const UltimateInt& _ui2) {
+        UltimateInt _r(_ui1);
+        _r %= _ui2;
+        return _r;
+    }
+
+    UltimateInt& UltimateInt::operator%=(const UltimateInt& _n) {
+        *this = *this - (*this / _n) * _n;
         return *this;
     }
 
@@ -269,12 +321,16 @@ namespace gdl {
         return _r;
     }
 
-    void UltimateInt::trim() {
+    void UltimateInt::crop() {
         while (!this->_num.empty() && this->_num[this->_num.size() - 1] == 0) {
             this->_num.pop_back();
         }
         if (this->_num.empty()) {
             this->_sign = 0;
         }
+    }
+
+    int8_t UltimateInt::sign() {
+        return this->_sign;
     }
 }
