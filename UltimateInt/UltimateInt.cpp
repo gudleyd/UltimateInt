@@ -3,7 +3,9 @@
 
 namespace gdl {
 
+    UltimateInt UltimateInt::ZERO = UltimateInt(0);
     UltimateInt UltimateInt::ONE = UltimateInt(1);
+    UltimateInt UltimateInt::TWO = UltimateInt(2);
 
     UltimateInt::UltimateInt() {
         this->_num.clear();
@@ -71,6 +73,15 @@ namespace gdl {
     UltimateInt& UltimateInt::operator--() {
         UltimateInt _sv = *this;
         *this -= ONE;
+        return *this;
+    }
+
+    UltimateInt& UltimateInt::operator+() {
+        return *this;
+    }
+
+    UltimateInt& UltimateInt::operator-() {
+        this->_sign *= -1;
         return *this;
     }
 
@@ -164,7 +175,7 @@ namespace gdl {
         } else if (this->_sign == -1 && _n._sign == 1) {
             *this = UltimateInt::abs(*this) + _n;
             this->_sign *= (signed char)-1;
-        } else {
+        } else if (this->_sign == _n._sign && this->_sign == -1) {
             *this = UltimateInt::abs(_n) - UltimateInt::abs(*this);
         }
         this->crop();
@@ -180,7 +191,7 @@ namespace gdl {
     UltimateInt& UltimateInt::operator*=(const UltimateInt& _n) {
         this->_sign *= _n._sign;
         if (this->_sign == 0) {
-            *this = UltimateInt(0);
+            *this = ZERO;
             return *this;
         }
         std::vector<int64_t> _r;
@@ -256,6 +267,7 @@ namespace gdl {
     }
 
     UltimateInt& UltimateInt::operator%=(const UltimateInt& _n) {
+        //std::cout << *this << " " << _n << " " << (*this / _n) << " " << (*this / _n) * _n << std::endl;
         *this = *this - (*this / _n) * _n;
         return *this;
     }
@@ -358,5 +370,18 @@ namespace gdl {
 
     int8_t UltimateInt::sign() {
         return this->_sign;
+    }
+
+    UltimateInt UltimateInt::pow(const UltimateInt& _n) {
+        UltimateInt p = _n;
+        UltimateInt res = ONE, a = *this;
+        while (p._sign != 0) {
+            if (p._num[0] & 1) {
+                res *= a;
+            }
+            a *= a;
+            p /= TWO;
+        }
+        return res;
     }
 }

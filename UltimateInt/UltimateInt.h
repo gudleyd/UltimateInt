@@ -39,8 +39,8 @@ namespace gdl {
         UltimateInt& operator=(const UltimateInt&);
         UltimateInt& operator=(const std::string&);
 
-        friend UltimateInt pow(const UltimateInt&, const UltimateInt&);
-        friend UltimateInt pow(const UltimateInt&, const int);
+        UltimateInt pow(const UltimateInt&);
+        UltimateInt pow(const int&);
 
         friend std::istream& operator>>(std::istream&, UltimateInt&);
         friend std::ostream& operator<<(std::ostream&, const UltimateInt&);
@@ -70,7 +70,9 @@ namespace gdl {
 
         void crop();
 
+        static UltimateInt ZERO;
         static UltimateInt ONE;
+        static UltimateInt TWO;
     };
 
 }
