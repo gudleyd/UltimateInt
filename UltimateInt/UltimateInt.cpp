@@ -25,7 +25,7 @@ namespace gdl {
                 val /= 10;
             }
         }
-        trim();
+        this->trim();
     }
 
     UltimateInt::UltimateInt(const char* _val) {
@@ -41,7 +41,7 @@ namespace gdl {
             this->_num.emplace_back(_val[i] - '0');
         }
         this->_num.emplace_back(_val[st] - '0');
-        trim();
+        this->trim();
     }
 
     UltimateInt::UltimateInt(const std::string& _val) {
@@ -57,7 +57,7 @@ namespace gdl {
             this->_num.emplace_back(_val[i] - '0');
         }
         this->_num.emplace_back(_val[st] - '0');
-        trim();
+        this->trim();
     }
 
     UltimateInt operator+(const gdl::UltimateInt& _ui1, const gdl::UltimateInt& _ui2) {
@@ -141,7 +141,44 @@ namespace gdl {
         } else {
             *this = UltimateInt::abs(_n) - UltimateInt::abs(*this);
         }
-        trim();
+        this->trim();
+        return *this;
+    }
+
+    UltimateInt operator*(const UltimateInt& _ui1, const UltimateInt& _ui2) {
+        UltimateInt _r(_ui1);
+        _r *= _ui2;
+        return _r;
+    }
+
+    UltimateInt& UltimateInt::operator*=(const UltimateInt& _n) {
+        this->_sign *= _n._sign;
+        if (this->_sign == 0) {
+            *this = UltimateInt(0);
+            return *this;
+        }
+        std::vector<int64_t> _r;
+        for (size_t i = 0; i < this->_num.size(); i++) {
+            for (size_t j = 0; j < _n._num.size(); j++) {
+                if (i + j < _r.size()) {
+                    _r[i + j] += this->_num[i] * _n._num[j];
+                } else {
+                    _r.push_back(this->_num[i] * _n._num[j]);
+                }
+            }
+        }
+        int64_t buf = 0;
+        for (size_t i = 0; i < _r.size(); i++) {
+            _r[i] += buf;
+            buf = _r[i] / 10;
+            _r[i] %= 10;
+        }
+        _r.push_back(buf);
+        this->_num = std::vector<int8_t> (_r.size());
+        for (size_t i = 0; i < _r.size(); i++) {
+            this->_num[i] = (int8_t)_r[i];
+        }
+        this->trim();
         return *this;
     }
 
