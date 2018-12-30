@@ -62,6 +62,9 @@ namespace gdl {
         static UltimateInt abs(const UltimateInt&);
         
         int8_t sign();
+        bool is_null();
+
+        std::vector<int8_t> binary(int sz = 0);
 
     private:
 
@@ -73,6 +76,8 @@ namespace gdl {
         static UltimateInt ZERO;
         static UltimateInt ONE;
         static UltimateInt TWO;
+
+        static UltimateInt KaratsubaMultiply(const UltimateInt&, const UltimateInt&);
     };
 
 }

@@ -1,6 +1,5 @@
 #include"UltimateInt.h"
 
-
 namespace gdl {
 
     UltimateInt UltimateInt::ZERO = UltimateInt(0);
@@ -180,6 +179,10 @@ namespace gdl {
         }
         this->crop();
         return *this;
+    }
+
+    UltimateInt UltimateInt::KaratsubaMultiply(const gdl::UltimateInt &, const UltimateInt &) {
+        return ONE;
     }
 
     UltimateInt operator*(const UltimateInt& _ui1, const UltimateInt& _ui2) {
@@ -372,6 +375,10 @@ namespace gdl {
         return this->_sign;
     }
 
+    bool UltimateInt::is_null() {
+        return !this->_sign;
+    }
+
     UltimateInt UltimateInt::pow(const UltimateInt& _n) {
         UltimateInt p = _n;
         UltimateInt res = ONE, a = *this;
@@ -383,5 +390,36 @@ namespace gdl {
             p /= TWO;
         }
         return res;
+    }
+
+    UltimateInt UltimateInt::pow(const int& _n) {
+        int p = _n;
+        UltimateInt res = ONE, a = *this;
+        while (p > 0) {
+            if (p & 1) {
+                res *= a;
+            }
+            if (p >>= 1) {
+                a *= a;
+            }
+        }
+        return res;
+    }
+
+    std::vector<int8_t> UltimateInt::binary(int sz) {
+        UltimateInt _c = *this;
+        std::vector <int8_t> _res;
+        while (!_c.is_null()) {
+            _res.push_back(_c._num[0] % 2);
+            _c /= TWO;
+        }
+        while (_res.size() < sz) {
+            _res.push_back(0);
+        }
+        size_t ln = _res.size();
+        for (size_t i = 0; i < ln / 2; i++) {
+            std::swap(_res[i], _res[ln - 1 - i]);
+        }
+        return _res;
     }
 }
