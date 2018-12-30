@@ -181,10 +181,6 @@ namespace gdl {
         return *this;
     }
 
-    UltimateInt UltimateInt::KaratsubaMultiply(const gdl::UltimateInt &, const UltimateInt &) {
-        return ONE;
-    }
-
     UltimateInt operator*(const UltimateInt& _ui1, const UltimateInt& _ui2) {
         UltimateInt _r(_ui1);
         _r *= _ui2;

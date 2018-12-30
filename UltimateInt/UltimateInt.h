@@ -77,7 +77,6 @@ namespace gdl {
         static UltimateInt ONE;
         static UltimateInt TWO;
 
-        static UltimateInt KaratsubaMultiply(const UltimateInt&, const UltimateInt&);
     };
 
 }
