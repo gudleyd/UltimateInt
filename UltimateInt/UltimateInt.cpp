@@ -1,5 +1,8 @@
 #include"UltimateInt.h"
 
+#define BASE 10000000
+#define BASE_LENGTH 7
+
 namespace gdl {
 
     UltimateInt UltimateInt::ZERO = UltimateInt(0);
@@ -15,7 +18,6 @@ namespace gdl {
         int val = _val;
         this->_num.clear();
         if (val == 0) {
-            this->_num.emplace_back(0);
             this->_sign = 0;
         } else {
             this->_sign = 1;
@@ -24,8 +26,8 @@ namespace gdl {
                 this->_sign = -1;
             }
             while (val != 0) {
-                this->_num.emplace_back(val % 10);
-                val /= 10;
+                this->_num.emplace_back(val % BASE);
+                val /= BASE;
             }
         }
         this->crop();
@@ -34,32 +36,60 @@ namespace gdl {
     UltimateInt::UltimateInt(const char* _val) {
         this->_num.clear();
         this->_sign = 1;
-        size_t st = 0;
+        int64_t st = 0;
         if (_val[0] == '-' || _val[0] == '+') {
             this->_sign = (_val[0] == '-' ? (unsigned char)-1 : (unsigned char)1);
             st++;
         }
-        size_t length = std::strlen(_val);
-        for (size_t i = length - 1; i > st; i--) {
-            this->_num.emplace_back(_val[i] - '0');
+        int64_t _sz = (int64_t)std::strlen(_val);
+        if (st && (_sz == 1)) {
+            return;
         }
-        this->_num.emplace_back(_val[st] - '0');
+        while (true) {
+            if (_sz <= st) {
+                break;
+            }
+            int64_t _ln = 0;
+            int dig = 0;
+            int64_t prefix = 1;
+            for (int64_t i = _sz - 1; i >= st && i >= _sz - BASE_LENGTH - st; --i) {
+                dig += (_val[i] - '0') * prefix;
+                prefix *= 10;
+                ++_ln;
+            }
+            this->_num.emplace_back(dig);
+            _sz -= _ln;
+        }
         this->crop();
     }
 
     UltimateInt::UltimateInt(const std::string& _val) {
         this->_num.clear();
         this->_sign = 1;
-        size_t st = 0;
+        int64_t st = 0;
         if (_val[0] == '-' || _val[0] == '+') {
             this->_sign = (_val[0] == '-' ? (unsigned char)-1 : (unsigned char)1);
             st++;
         }
-        size_t length = _val.size();
-        for (size_t i = length - 1; i > st; i--) {
-            this->_num.emplace_back(_val[i] - '0');
+        int64_t _sz = (int64_t)_val.size();
+        if (st && (_sz == 1)) {
+            return;
         }
-        this->_num.emplace_back(_val[st] - '0');
+        while (true) {
+            if (_sz <= st) {
+                break;
+            }
+            int64_t _ln = 0;
+            int dig = 0;
+            int64_t prefix = 1;
+            for (int64_t i = _sz - 1; i >= st && i >= _sz - BASE_LENGTH; --i) {
+                dig += (_val[i] - '0') * prefix;
+                prefix *= 10;
+                ++_ln;
+            }
+            this->_num.emplace_back(dig);
+            _sz -= _ln;
+        }
         this->crop();
     }
 
@@ -80,8 +110,10 @@ namespace gdl {
     }
 
     UltimateInt& UltimateInt::operator-() {
-        this->_sign *= -1;
-        return *this;
+        UltimateInt *_r = new UltimateInt;
+        *_r = *this;
+        _r->_sign *= -1;
+        return *_r;
     }
 
     const UltimateInt UltimateInt::operator++(int) {
@@ -112,9 +144,9 @@ namespace gdl {
             _r._sign = this->_sign;
             size_t t_length = this->_num.size();
             size_t n_length = _n._num.size();
-            int8_t buf = 0;
+            NUMBER_TYPE buf = 0;
             for (size_t i = 0; i < std::max(t_length, n_length); i++) {
-                int8_t sum = 0;
+                NUMBER_TYPE sum = 0;
                 if (i >= t_length) {
                     sum = _n._num[i];
                 } else if (i >= n_length) {
@@ -123,12 +155,12 @@ namespace gdl {
                     sum = _n._num[i] + this->_num[i];
                 }
                 sum += buf;
-                buf = sum / (int8_t)10;
-                _r._num.emplace_back(sum % 10);
+                buf = sum / (NUMBER_TYPE)BASE;
+                _r._num.emplace_back(sum % BASE);
             }
             while (buf != 0) {
-                _r._num.emplace_back(buf % 10);
-                buf /= 10;
+                _r._num.emplace_back(buf % BASE);
+                buf /= BASE;
             }
         } else {
             if (this->_sign == 1) {
@@ -159,7 +191,7 @@ namespace gdl {
                 for (size_t i = 0; i < _n._num.size() || buf; ++i) {
                     this->_num[i] -= buf + (i < _n._num.size() ? _n._num[i] : 0);
                     if (this->_num[i] < 0) {
-                        this->_num[i] += 10;
+                        this->_num[i] += BASE;
                         buf = 1;
                     } else {
                         buf = 0;
@@ -206,13 +238,13 @@ namespace gdl {
         int64_t buf = 0;
         for (size_t i = 0; i < _r.size(); i++) {
             _r[i] += buf;
-            buf = _r[i] / 10;
-            _r[i] %= 10;
+            buf = _r[i] / BASE;
+            _r[i] %= BASE;
         }
         _r.push_back(buf);
-        this->_num = std::vector<int8_t> (_r.size());
+        this->_num = std::vector<NUMBER_TYPE> (_r.size());
         for (size_t i = 0; i < _r.size(); i++) {
-            this->_num[i] = (int8_t)_r[i];
+            this->_num[i] = (NUMBER_TYPE)_r[i];
         }
         this->crop();
         return *this;
@@ -224,38 +256,61 @@ namespace gdl {
         return _r;
     }
 
-    UltimateInt& UltimateInt::operator/=(const UltimateInt& _n) {
-        if (_n._sign == 0) {
-            *this = UltimateInt(0);
-            return *this;
+    NUMBER_TYPE bin_division(const UltimateInt& _n1, const UltimateInt& _n2) {
+        int _l = 0, _r = 1 << 30;
+        while (_r - _l > 1) {
+            int _mm = (_r + _l) / 2;
+            UltimateInt _m = UltimateInt(_mm);
+            UltimateInt _res = _n2 * _m;
+            if (_res == _n1) {
+                return _mm;
+            }
+            if (_res < _n1) {
+                _l = _mm;
+            } else {
+                _r = _mm;
+            }
         }
-        if (this->_num.size() < _n._num.size()) {
-            *this = UltimateInt(0);
-            return *this;
+        return _l;
+    }
+
+
+    std::pair<UltimateInt, UltimateInt> UltimateInt::division(const UltimateInt& _n1, const UltimateInt& _n) {
+        if (_n._sign == 0) {
+            return std::make_pair(UltimateInt(0), UltimateInt(0));
+        }
+        if (_n1 < _n) {
+            return std::make_pair(UltimateInt(0), _n1);
+        }
+        if (_n1._num.size() == 1) {
+            return std::make_pair(UltimateInt((_n1._sign * _n1._num[0]) / _n._num[0]), UltimateInt((_n1._sign * _n1._num[0]) % _n._num[0]));
         }
         UltimateInt _q, _r;
-        _q._sign = this->_sign * _n._sign;
-        UltimateInt TEN(10);
+        _q._sign = _n1._sign * _n._sign;
+        UltimateInt TEN(BASE);
         UltimateInt _d = UltimateInt::abs(_n);
-        for (size_t i = this->_num.size(); i >= 1; i--) {
+        for (size_t i = _n1._num.size(); i >= 1; i--) {
             _r *= TEN;
             if (_r._num.empty()) {
                 _r._num.emplace_back(0);
                 _r._sign = 1;
             }
-            _r._num[0] = this->_num[i - 1];
-            int8_t cnt = 0;
-            while (_r >= _d) {
-                _r -= _d;
-                ++cnt;
-            }
+            _r._num[0] = _n1._num[i - 1];
+            NUMBER_TYPE cnt = bin_division(_r, _d);
+            _r -= _d * UltimateInt(cnt);
             while (_q._num.size() < i) {
                 _q._num.emplace_back(0);
             }
             _q._num[i - 1] = cnt;
         }
-        *this = _q;
-        this->crop();
+        _r._sign = _n1._sign;
+        _q.crop();
+        _r.crop();
+        return std::make_pair(_q, _r);
+    }
+
+    UltimateInt& UltimateInt::operator/=(const UltimateInt& _n) {
+        *this = division(*this, _n).first;
         return *this;
     }
 
@@ -266,8 +321,7 @@ namespace gdl {
     }
 
     UltimateInt& UltimateInt::operator%=(const UltimateInt& _n) {
-        //std::cout << *this << " " << _n << " " << (*this / _n) << " " << (*this / _n) * _n << std::endl;
-        *this = *this - (*this / _n) * _n;
+        *this = division(*this, _n).second;
         return *this;
     }
 
@@ -285,6 +339,17 @@ namespace gdl {
         return in;
     }
 
+
+    std::string to_str(int64_t _n, bool z = 1) {
+        std::string s = "";
+        while (_n != 0) {
+            s += (_n % 10) + '0';
+            _n /= 10;
+        }
+        std::reverse(s.begin(), s.end());
+        return (z ? std::string(BASE_LENGTH - s.size(), '0') : "") + s;
+    }
+
     std::ostream& operator<<(std::ostream& out, const UltimateInt& _n) {
         if (_n._sign == 0) {
             out << 0;
@@ -293,9 +358,9 @@ namespace gdl {
                 out << '-';
             }
             for (size_t i = _n._num.size() - 1; i > 0; i--) {
-                out << (int)_n._num[i];
+                out << to_str(_n._num[i], i != _n._num.size() - 1);
             }
-            out << (int)_n._num[0];
+            out << to_str(_n._num[0], _n._num.size() != 1);
         }
         return out;
     }

@@ -9,6 +9,8 @@
 #include <string>
 #include <iostream>
 
+#define NUMBER_TYPE int64_t
+
 namespace gdl {
 
     class UltimateInt{
@@ -16,7 +18,7 @@ namespace gdl {
     public:
 
         UltimateInt();
-        explicit UltimateInt(const int &);
+        explicit UltimateInt(const int&);
         explicit UltimateInt(const char*);
         explicit UltimateInt(const std::string &);
 
@@ -68,7 +70,7 @@ namespace gdl {
 
     private:
 
-        std::vector<int8_t> _num;
+        std::vector<NUMBER_TYPE> _num;
         signed char _sign;
 
         void crop();
@@ -76,6 +78,8 @@ namespace gdl {
         static UltimateInt ZERO;
         static UltimateInt ONE;
         static UltimateInt TWO;
+
+        std::pair<UltimateInt, UltimateInt> division(const UltimateInt&, const UltimateInt&);
 
     };
 
