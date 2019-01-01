@@ -1,8 +1,5 @@
 #include"UltimateInt.h"
 
-#define BASE 10000000
-#define BASE_LENGTH 7
-
 namespace gdl {
 
     UltimateInt UltimateInt::ZERO = UltimateInt(0);
@@ -15,7 +12,11 @@ namespace gdl {
     }
 
     UltimateInt::UltimateInt(const int& _val) {
-        int val = _val;
+        *this = UltimateInt((int64_t)_val);
+    }
+
+    UltimateInt::UltimateInt(const int64_t& _val) {
+        int64_t val = _val;
         this->_num.clear();
         if (val == 0) {
             this->_sign = 0;
@@ -110,7 +111,7 @@ namespace gdl {
     }
 
     UltimateInt& UltimateInt::operator-() {
-        UltimateInt *_r = new UltimateInt;
+        auto *_r = new UltimateInt;
         *_r = *this;
         _r->_sign *= -1;
         return *_r;
@@ -256,10 +257,16 @@ namespace gdl {
         return _r;
     }
 
-    NUMBER_TYPE bin_division(const UltimateInt& _n1, const UltimateInt& _n2) {
-        int _l = 0, _r = 1 << 30;
+    NUMBER_TYPE UltimateInt::bin_division(const UltimateInt& _n1, const UltimateInt& _n2) {
+        if (_n1._num.size() == 1 && _n2._num.size() == 1) {
+            return _n1._num[0] / _n2._num[0];
+        }
+        if (_n1._num.size() == 2 && _n2._num.size() == 1) {
+            return (_n1._num[0] + _n1._num[1] * BASE) / _n2._num[0];
+        }
+        NUMBER_TYPE _l = 0, _r = BASE;
         while (_r - _l > 1) {
-            int _mm = (_r + _l) / 2;
+            NUMBER_TYPE _mm = (_r + _l) / 2;
             UltimateInt _m = UltimateInt(_mm);
             UltimateInt _res = _n2 * _m;
             if (_res == _n1) {
@@ -296,7 +303,7 @@ namespace gdl {
                 _r._sign = 1;
             }
             _r._num[0] = _n1._num[i - 1];
-            NUMBER_TYPE cnt = bin_division(_r, _d);
+            NUMBER_TYPE cnt = UltimateInt::bin_division(_r, _d);
             _r -= _d * UltimateInt(cnt);
             while (_q._num.size() < i) {
                 _q._num.emplace_back(0);
@@ -419,7 +426,7 @@ namespace gdl {
 
     UltimateInt UltimateInt::abs(const gdl::UltimateInt& _ui) {
         UltimateInt _r(_ui);
-        _r._sign = std::abs(_r._sign);
+        _r._sign = _r._sign * _r._sign;
         return _r;
     }
 
@@ -467,9 +474,9 @@ namespace gdl {
         return res;
     }
 
-    std::vector<int8_t> UltimateInt::binary(int sz) {
+    std::vector<int> UltimateInt::binary(const int& sz) {
         UltimateInt _c = *this;
-        std::vector <int8_t> _res;
+        std::vector <int> _res;
         while (!_c.is_null()) {
             _res.push_back(_c._num[0] % 2);
             _c /= TWO;
@@ -481,6 +488,31 @@ namespace gdl {
         for (size_t i = 0; i < ln / 2; i++) {
             std::swap(_res[i], _res[ln - 1 - i]);
         }
+        if (_res.empty()) {
+            _res.push_back(0);
+        }
         return _res;
+    }
+
+    void UltimateInt::from_binary(const std::vector<int>& _v) {
+        size_t len = _v.size();
+        for (size_t i = 0; i < len; i++) {
+            *this *= TWO;
+            if (_v[i]) {
+                *this += ONE;
+            }
+        }
+        this->crop();
+    }
+
+    void UltimateInt::from_binary(const std::string& _v) {
+        size_t len = _v.length();
+        for (size_t i = 0; i < len; i++) {
+            *this *= TWO;
+            if (_v[i] - '0') {
+                *this += ONE;
+            }
+        }
+        this->crop();
     }
 }
