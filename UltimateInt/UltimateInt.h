@@ -9,6 +9,11 @@
 #include <string>
 #include <iostream>
 
+#define NUMBER_TYPE int64_t
+#define BASE 10000000
+#define BASE_LENGTH 7
+
+
 namespace gdl {
 
     class UltimateInt{
@@ -16,7 +21,8 @@ namespace gdl {
     public:
 
         UltimateInt();
-        explicit UltimateInt(const int &);
+        explicit UltimateInt(const int&);
+        explicit UltimateInt(const int64_t&);
         explicit UltimateInt(const char*);
         explicit UltimateInt(const std::string &);
 
@@ -64,11 +70,13 @@ namespace gdl {
         int8_t sign();
         bool is_null();
 
-        std::vector<int8_t> binary(int sz = 0);
+        std::vector<int> binary(const int& sz = 0);
+        void from_binary(const std::vector<int>&);
+        void from_binary(const std::string&);
 
     private:
 
-        std::vector<int8_t> _num;
+        std::vector<NUMBER_TYPE> _num;
         signed char _sign;
 
         void crop();
@@ -76,6 +84,10 @@ namespace gdl {
         static UltimateInt ZERO;
         static UltimateInt ONE;
         static UltimateInt TWO;
+
+        std::pair<UltimateInt, UltimateInt> division(const UltimateInt&, const UltimateInt&);
+
+        static NUMBER_TYPE bin_division(const UltimateInt&, const UltimateInt&);
 
     };
 
