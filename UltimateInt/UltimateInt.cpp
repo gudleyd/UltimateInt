@@ -286,7 +286,7 @@ namespace gdl {
         if (_n._sign == 0) {
             return std::make_pair(UltimateInt(0), UltimateInt(0));
         }
-        if (_n1 < _n) {
+        if (_n1._num.size() < _n._num.size()) {
             return std::make_pair(UltimateInt(0), _n1);
         }
         if (_n1._num.size() == 1) {
