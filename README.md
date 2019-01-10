@@ -1,10 +1,9 @@
 # UltimateInt
 Just one more C++ BigInt implementation, but this one is unique (because it's mine)
 
-Will or already in use in my next projects
-
 Multiplication time here:
 a = length of the first number
+
 b = length of the second
 
 | a*b   | 1       | 10      | 100     | 1e3     | 1e4     | 5*1e4   | 1e5    |
