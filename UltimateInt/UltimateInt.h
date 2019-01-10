@@ -9,7 +9,6 @@
 #include <string>
 #include <iostream>
 
-#define NUMBER_TYPE int64_t
 #define BASE 10000000
 #define BASE_LENGTH 7
 
@@ -51,6 +50,8 @@ namespace gdl {
         friend std::istream& operator>>(std::istream&, UltimateInt&);
         friend std::ostream& operator<<(std::ostream&, const UltimateInt&);
 
+        int operator[](int const &);
+
         friend UltimateInt operator+(const UltimateInt&, const UltimateInt&);
         friend UltimateInt operator-(const UltimateInt&, const UltimateInt&);
         friend UltimateInt operator*(const UltimateInt&, const UltimateInt&);
@@ -65,18 +66,23 @@ namespace gdl {
         friend bool operator==(const UltimateInt&, const UltimateInt&);
         friend bool operator!=(const UltimateInt&, const UltimateInt&);
 
-        static UltimateInt abs(const UltimateInt&);
-        
+        void clear();
         int8_t sign();
         bool is_null();
+        int64_t size();
 
-        std::vector<int> binary(const int& sz = 0);
-        void from_binary(const std::vector<int>&);
+        static UltimateInt abs(const UltimateInt&);
+        static std::string to_string(const UltimateInt&);
+        static UltimateInt ui_random(size_t size);
+
         void from_binary(const std::string&);
+        void from_binary(const std::vector<int>&);
+        std::vector<int> to_binary(const int &sz = 0);
+
 
     private:
 
-        std::vector<NUMBER_TYPE> _num;
+        std::vector<int64_t> _num;
         signed char _sign;
 
         void crop();
@@ -86,8 +92,7 @@ namespace gdl {
         static UltimateInt TWO;
 
         std::pair<UltimateInt, UltimateInt> division(const UltimateInt&, const UltimateInt&);
-
-        static NUMBER_TYPE bin_division(const UltimateInt&, const UltimateInt&);
+        static int64_t bin_division(const UltimateInt&, const UltimateInt&);
 
     };
 

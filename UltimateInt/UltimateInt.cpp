@@ -7,8 +7,7 @@ namespace gdl {
     UltimateInt UltimateInt::TWO = UltimateInt(2);
 
     UltimateInt::UltimateInt() {
-        this->_num.clear();
-        this->_sign = 0;
+        this->clear();
     }
 
     UltimateInt::UltimateInt(const int& _val) {
@@ -42,7 +41,7 @@ namespace gdl {
             this->_sign = (_val[0] == '-' ? (unsigned char)-1 : (unsigned char)1);
             st++;
         }
-        int64_t _sz = (int64_t)std::strlen(_val);
+        auto _sz = (int64_t)std::strlen(_val);
         if (st && (_sz == 1)) {
             return;
         }
@@ -72,7 +71,7 @@ namespace gdl {
             this->_sign = (_val[0] == '-' ? (unsigned char)-1 : (unsigned char)1);
             st++;
         }
-        int64_t _sz = (int64_t)_val.size();
+        auto _sz = (int64_t)_val.size();
         if (st && (_sz == 1)) {
             return;
         }
@@ -145,9 +144,9 @@ namespace gdl {
             _r._sign = this->_sign;
             size_t t_length = this->_num.size();
             size_t n_length = _n._num.size();
-            NUMBER_TYPE buf = 0;
+            int64_t buf = 0;
             for (size_t i = 0; i < std::max(t_length, n_length); i++) {
-                NUMBER_TYPE sum = 0;
+                int64_t sum = 0;
                 if (i >= t_length) {
                     sum = _n._num[i];
                 } else if (i >= n_length) {
@@ -156,7 +155,7 @@ namespace gdl {
                     sum = _n._num[i] + this->_num[i];
                 }
                 sum += buf;
-                buf = sum / (NUMBER_TYPE)BASE;
+                buf = sum / (int64_t)BASE;
                 _r._num.emplace_back(sum % BASE);
             }
             while (buf != 0) {
@@ -243,9 +242,9 @@ namespace gdl {
             _r[i] %= BASE;
         }
         _r.push_back(buf);
-        this->_num = std::vector<NUMBER_TYPE> (_r.size());
+        this->_num = std::vector<int64_t> (_r.size());
         for (size_t i = 0; i < _r.size(); i++) {
-            this->_num[i] = (NUMBER_TYPE)_r[i];
+            this->_num[i] = (int64_t)_r[i];
         }
         this->crop();
         return *this;
@@ -257,16 +256,16 @@ namespace gdl {
         return _r;
     }
 
-    NUMBER_TYPE UltimateInt::bin_division(const UltimateInt& _n1, const UltimateInt& _n2) {
+    int64_t UltimateInt::bin_division(const UltimateInt& _n1, const UltimateInt& _n2) {
         if (_n1._num.size() == 1 && _n2._num.size() == 1) {
             return _n1._num[0] / _n2._num[0];
         }
         if (_n1._num.size() == 2 && _n2._num.size() == 1) {
             return (_n1._num[0] + _n1._num[1] * BASE) / _n2._num[0];
         }
-        NUMBER_TYPE _l = 0, _r = BASE;
+        int64_t _l = 0, _r = BASE;
         while (_r - _l > 1) {
-            NUMBER_TYPE _mm = (_r + _l) / 2;
+            int64_t _mm = (_r + _l) / 2;
             UltimateInt _m = UltimateInt(_mm);
             UltimateInt _res = _n2 * _m;
             if (_res == _n1) {
@@ -303,7 +302,7 @@ namespace gdl {
                 _r._sign = 1;
             }
             _r._num[0] = _n1._num[i - 1];
-            NUMBER_TYPE cnt = UltimateInt::bin_division(_r, _d);
+            int64_t cnt = UltimateInt::bin_division(_r, _d);
             _r -= _d * UltimateInt(cnt);
             while (_q._num.size() < i) {
                 _q._num.emplace_back(0);
@@ -346,29 +345,52 @@ namespace gdl {
         return in;
     }
 
-
-    std::string to_str(int64_t _n, bool z = 1) {
-        std::string s = "";
+    std::string __to_str(int64_t _n, bool z = 1) {
+        std::string s;
         while (_n != 0) {
-            s += (_n % 10) + '0';
+            s += static_cast<char>(_n % 10) + '0';
             _n /= 10;
         }
         std::reverse(s.begin(), s.end());
         return (z ? std::string(BASE_LENGTH - s.size(), '0') : "") + s;
     }
 
-    std::ostream& operator<<(std::ostream& out, const UltimateInt& _n) {
-        if (_n._sign == 0) {
-            out << 0;
-        } else {
-            if (_n._sign == -1) {
-                out << '-';
+    int UltimateInt::operator[](const int& _n) {
+        if (this->is_null()) {
+            if (_n == 0) {
+                return 0;
             }
-            for (size_t i = _n._num.size() - 1; i > 0; i--) {
-                out << to_str(_n._num[i], i != _n._num.size() - 1);
-            }
-            out << to_str(_n._num[0], _n._num.size() != 1);
+            return -1;
         }
+        int64_t i = _n / BASE_LENGTH;
+        int64_t j = _n % BASE_LENGTH;
+        return __to_str(this->_num[i])[BASE_LENGTH - 1 - j] -'0';
+    }
+
+    std::string UltimateInt::to_string(const UltimateInt& _n) {
+        if (_n._sign == 0) {
+            return "0";
+        }
+        std::string _res;
+        if (_n._sign == -1) {
+            _res += '-';
+        }
+        for (size_t i = _n._num.size() - 1; i > 0; i--) {
+            _res += __to_str(_n._num[i], i != _n._num.size() - 1);
+        }
+        _res += __to_str(_n._num[0], _n._num.size() != 1);
+        return _res;
+    }
+
+    int64_t UltimateInt::size() {
+        if (this->is_null()) {
+            return 1;
+        }
+        return static_cast<int64_t>(this->_num.size() - 1) * BASE_LENGTH + __to_str(this->_num[this->_num.size() - 1], 0).size();
+    }
+
+    std::ostream& operator<<(std::ostream& out, const UltimateInt& _n) {
+        out << UltimateInt::to_string(_n);
         return out;
     }
 
@@ -474,7 +496,7 @@ namespace gdl {
         return res;
     }
 
-    std::vector<int> UltimateInt::binary(const int& sz) {
+    std::vector<int> UltimateInt::to_binary(const int &sz) {
         UltimateInt _c = *this;
         std::vector <int> _res;
         while (!_c.is_null()) {
@@ -514,5 +536,22 @@ namespace gdl {
             }
         }
         this->crop();
+    }
+
+    void UltimateInt::clear() {
+        this->_num.clear();
+        this->_sign = 0;
+    }
+
+    UltimateInt UltimateInt::ui_random(size_t size) {
+        UltimateInt buf(1), res;
+        for (size_t i = 0; i < size; ++i) {
+            int rnd = rand() % 2;
+            if (rnd) {
+                res += buf;
+            }
+            buf *= UltimateInt::TWO;
+        }
+        return res;
     }
 }
